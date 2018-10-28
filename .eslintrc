@@ -12,5 +12,7 @@
     "import/no-unresolved": "off",
     "react/sort-comp": "off",
     "jest/no-disabled-tests": "off",
+    "no-unused-vars": "off",
+    "eslint-comments/no-unused-disable": "off",
   }
 }
