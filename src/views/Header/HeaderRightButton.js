@@ -33,7 +33,7 @@ class HeaderRightButton extends React.PureComponent {
   };
 
   _renderRightImage() {
-    const { imageSource: rightImage, title, tintColor } = this.props;
+    const { backImage: rightImage, title, tintColor } = this.props;
 
     let RightImage;
     let props;
@@ -77,7 +77,7 @@ class HeaderRightButton extends React.PureComponent {
   _maybeRenderTitle() {
     const {
       layoutPreset,
-      titleVisible: rightTitleVisible,
+      backTitleVisible: rightTitleVisible,
       width,
       title,
       titleStyle,

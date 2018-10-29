@@ -249,10 +249,10 @@ class Header extends React.PureComponent {
         onPress={onPress}
         pressColorAndroid={options.headerPressColorAndroid}
         tintColor={options.headerTintColor}
-        imageSource={backImage}
+        backImage={backImage}
         title={backButtonTitle}
         truncatedTitle={truncatedBackButtonTitle}
-        titleVisible={this.props.backTitleVisible}
+        backTitleVisible={this.props.backTitleVisible}
         titleStyle={options.headerBackTitleStyle}
         layoutPreset={this.props.layoutPreset}
         width={width}
@@ -343,10 +343,10 @@ class Header extends React.PureComponent {
         onPress={onPress}
         pressColorAndroid={options.headerPressColorAndroid}
         tintColor={options.headerTintColor}
-        imageSource={rightImage}
+        backImage={rightImage}
         title={rightButtonTitle}
         truncatedTitle={truncatedRightButtonTitle}
-        titleVisible={this.props.rightTitleVisible}
+        backTitleVisible={this.props.rightTitleVisible}
         titleStyle={options.headerRightTitleStyle}
         layoutPreset={this.props.layoutPreset}
         width={width}

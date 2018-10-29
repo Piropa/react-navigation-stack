@@ -33,7 +33,7 @@ class HeaderBackButton extends React.PureComponent {
   };
 
   _renderBackImage() {
-    const { imageSource: backImage, title, tintColor } = this.props;
+    const { backImage, title, tintColor } = this.props;
 
     let BackImage;
     let props;
