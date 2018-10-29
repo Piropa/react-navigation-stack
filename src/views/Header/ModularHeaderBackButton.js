@@ -30,21 +30,34 @@ class ModularHeaderBackButton extends React.PureComponent {
 
     if (React.isValidElement(backImage)) {
       return backImage;
-    } else if (backImage) {
+    } else if (typeof backImage === 'function') {
       BackImage = backImage;
       props = {
         tintColor,
         title,
       };
     } else {
-      BackImage = Image;
+      let sourceImage = undefined,
+        sourceFunc = undefined,
+        moreProps = undefined;
+      if (backImage && typeof backImage === 'object' && backImage.source) {
+        if (React.isValidElement(backImage.source)) {
+          return backImage.source;
+        } else if (typeof backImage.source === 'function') {
+          sourceFunc = backImage.source;
+          moreProps = { tintColor, title };
+        } else sourceImage = backImage.source;
+      }
+      BackImage = sourceFunc || Image;
       props = {
         style: [
           styles.icon,
+          !sourceFunc && styles.iconResizeMode,
           !!title && styles.iconWithTitle,
-          !!tintColor && { tintColor },
+          !sourceFunc && !!tintColor && { tintColor },
         ],
-        source: defaultBackImage,
+        source: sourceImage || defaultBackImage,
+        ...moreProps,
       };
     }
 
@@ -128,8 +141,11 @@ const styles = StyleSheet.create({
     marginLeft: 9,
     marginRight: 22,
     marginVertical: 12,
-    resizeMode: 'contain',
+    // resizeMode: 'contain',
     transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
+  },
+  iconResizeMode: {
+    resizeMode: 'contain',
   },
   iconWithTitle: {
     marginRight: 3,

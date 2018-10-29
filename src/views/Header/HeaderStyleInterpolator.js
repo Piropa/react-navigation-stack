@@ -185,6 +185,8 @@ function forLeftButton(props) {
   };
 }
 
+const forRightButton = forLeftButton;
+
 /*
  * NOTE: this offset calculation is an approximation that gives us
  * decent results in many cases, but it is ultimately a poor substitute
@@ -204,6 +206,69 @@ function forLeftLabel(props) {
   const index = scene.index;
 
   const offset = LEFT_LABEL_OFFSET;
+
+  // Similarly to the animation of the left label, when animating to or from a scene without
+  // a header, we keep the label at full opacity and in the same position for as long as possible.
+  return {
+    // For now we fade out the label before fading in the title, so the
+    // differences between the label and title position can be hopefully not so
+    // noticable to the user
+    opacity: position.interpolate({
+      inputRange: [
+        first,
+        first + 0.001,
+        index - 0.35,
+        index,
+        index + 0.5,
+        last - 0.001,
+        last,
+      ],
+      outputRange: [
+        0,
+        hasHeader(scenes[first]) ? 0 : 1,
+        hasHeader(scenes[first]) ? 0 : 1,
+        hasHeader(scenes[index]) ? 1 : 0,
+        hasHeader(scenes[last]) ? 0.5 : 1,
+        hasHeader(scenes[last]) ? 0 : 1,
+        0,
+      ],
+    }),
+    transform: [
+      {
+        translateX: position.interpolate({
+          inputRange: [first, first + 0.001, index, last - 0.001, last],
+          outputRange: I18nManager.isRTL
+            ? [
+                -offset * 1.5,
+                hasHeader(scenes[first]) ? -offset * 1.5 : 0,
+                0,
+                hasHeader(scenes[last]) ? offset : 0,
+                offset,
+              ]
+            : [
+                offset,
+                hasHeader(scenes[first]) ? offset : 0,
+                0,
+                hasHeader(scenes[last]) ? -offset * 1.5 : 0,
+                -offset * 1.5,
+              ],
+        }),
+      },
+    ],
+  };
+}
+
+const RIGHT_LABEL_OFFSET = -Dimensions.get('window').width / 2 - 70 - 25;
+function forRightLabel(props) {
+  const { position, scene, scenes } = props;
+  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+
+  if (!interpolate) return { opacity: 0 };
+
+  const { first, last } = interpolate;
+  const index = scene.index;
+
+  const offset = RIGHT_LABEL_OFFSET;
 
   // Similarly to the animation of the left label, when animating to or from a scene without
   // a header, we keep the label at full opacity and in the same position for as long as possible.
@@ -324,6 +389,62 @@ function forCenterFromLeft(props) {
   };
 }
 
+function forCenterFromRight(props) {
+  const { position, scene, scenes } = props;
+  const interpolate = getSceneIndicesForInterpolationInputRange(props);
+
+  if (!interpolate) return { opacity: 0 };
+
+  const { first, last } = interpolate;
+  const index = scene.index;
+  const offset = -TITLE_OFFSET_IOS;
+
+  return {
+    opacity: position.interpolate({
+      inputRange: [
+        first,
+        first + 0.001,
+        index - 0.5,
+        index,
+        index + 0.7,
+        last - 0.001,
+        last,
+      ],
+      outputRange: [
+        0,
+        hasHeader(scenes[first]) ? 0 : 1,
+        hasHeader(scenes[first]) ? 0 : 1,
+        hasHeader(scenes[index]) ? 1 : 0,
+        hasHeader(scenes[last]) ? 0 : 1,
+        hasHeader(scenes[last]) ? 0 : 1,
+        0,
+      ],
+    }),
+    transform: [
+      {
+        translateX: position.interpolate({
+          inputRange: [first, first + 0.001, index, last - 0.001, last],
+          outputRange: I18nManager.isRTL
+            ? [
+                -offset,
+                hasHeader(scenes[first]) ? -offset : 0,
+                0,
+                hasHeader(scenes[last]) ? offset : 0,
+                offset,
+              ]
+            : [
+                offset,
+                hasHeader(scenes[first]) ? offset : 0,
+                0,
+                hasHeader(scenes[last]) ? -offset : 0,
+                -offset,
+              ],
+        }),
+      },
+    ],
+  };
+}
+
 // Default to no transition
 function forBackground() {
   return null;
@@ -357,8 +478,11 @@ export default {
   forLeftButton,
   forLeftLabel,
   forCenterFromLeft,
+  forCenterFromRight,
   forCenter,
   forRight,
+  forRightButton,
+  forRightLabel,
   forBackground,
   forBackgroundWithTranslation,
 };

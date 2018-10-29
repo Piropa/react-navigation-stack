@@ -171,6 +171,7 @@ class StackViewLayout extends React.Component {
           transitionPreset: this._getHeaderTransitionPreset(),
           layoutPreset: this._getHeaderLayoutPreset(),
           backTitleVisible: this._getheaderBackTitleVisible(),
+          rightTitleVisible: this._getheaderRightTitleVisible(),
           leftInterpolator: headerLeftInterpolator,
           titleInterpolator: headerTitleInterpolator,
           rightInterpolator: headerRightInterpolator,
@@ -555,6 +556,12 @@ class StackViewLayout extends React.Component {
     const { headerBackTitleVisible } = this.props;
 
     return headerBackTitleVisible;
+  }
+
+  _getheaderRightTitleVisible() {
+    const { headerRightTitleVisible } = this.props;
+
+    return headerRightTitleVisible;
   }
 
   _renderInnerScene(scene) {

@@ -14,6 +14,7 @@ import { SafeAreaView, withOrientation } from 'react-navigation';
 
 import HeaderTitle from './HeaderTitle';
 import HeaderBackButton from './HeaderBackButton';
+import HeaderRightButton from './HeaderRightButton';
 import ModularHeaderBackButton from './ModularHeaderBackButton';
 import HeaderStyleInterpolator from './HeaderStyleInterpolator';
 
@@ -82,6 +83,9 @@ class Header extends React.PureComponent {
     titleFromLeftInterpolator: HeaderStyleInterpolator.forCenterFromLeft,
     titleInterpolator: HeaderStyleInterpolator.forCenter,
     rightInterpolator: HeaderStyleInterpolator.forRight,
+    rightButtonInterpolator: HeaderStyleInterpolator.forRightButton,
+    rightLabelInterpolator: HeaderStyleInterpolator.forRightLabel,
+    titleFromRightInterpolator: HeaderStyleInterpolator.forCenterFromRight,
     backgroundInterpolator: HeaderStyleInterpolator.forBackground,
   };
 
@@ -111,23 +115,50 @@ class Header extends React.PureComponent {
   }
 
   _getBackButtonTitleString(scene) {
+    const { headerBackTitle, headerLeft } = scene.descriptor.options;
+    let isObject = typeof headerLeft === 'object';
+    let title = (isObject && headerLeft.title) || headerBackTitle;
+    if (title) return title;
+    if (headerBackTitle === null || (isObject && headerLeft.title === null)) {
+      return null;
+    }
     const lastScene = this._getLastScene(scene);
     if (!lastScene) {
       return null;
-    }
-    const { headerBackTitle } = lastScene.descriptor.options;
-    if (headerBackTitle || headerBackTitle === null) {
-      return headerBackTitle;
     }
     return this._getHeaderTitleString(lastScene);
   }
 
+  _getRightButtonTitleString(scene) {
+    const { headerRightTitle, headerRight } = scene.descriptor.options;
+    let isObject = typeof headerLeft === 'object';
+    let title = (isObject && headerRight.title) || headerRightTitle;
+    if (title) return title;
+    // if (headerRightTitle === null || (isObject && headerRight.title === null)) {
+    return null;
+    // }
+    // return 'more';
+  }
+
   _getTruncatedBackButtonTitle(scene) {
+    const { headerTruncatedBackTitle, headerLeft } = scene.descriptor.options;
+    let isObject = typeof headerLeft === 'object';
+    let title =
+      (isObject && headerLeft.truncatedTitle) || headerTruncatedBackTitle;
+    if (title) return title;
+    // return null;
     const lastScene = this._getLastScene(scene);
-    if (!lastScene) {
-      return null;
-    }
+    if (!lastScene) return null;
     return lastScene.descriptor.options.headerTruncatedBackTitle;
+  }
+
+  _getTruncatedRightButtonTitle(scene) {
+    const { headerTruncatedRightTitle, headerRight } = scene.descriptor.options;
+    let isObject = typeof headerRight === 'object';
+    let title =
+      (isObject && headerRight.truncatedTitle) || headerTruncatedRightTitle;
+    if (title) return title;
+    return null;
   }
 
   _renderTitleComponent = props => {
@@ -179,15 +210,15 @@ class Header extends React.PureComponent {
   };
 
   _renderLeftComponent = props => {
-    const { options } = props.scene.descriptor;
-    if (
-      React.isValidElement(options.headerLeft) ||
-      options.headerLeft === null
-    ) {
-      return options.headerLeft;
+    const {
+      options,
+      options: { headerLeft },
+    } = props.scene.descriptor;
+    if (React.isValidElement(headerLeft) || headerLeft === null) {
+      return headerLeft;
     }
 
-    if (!options.headerLeft && props.scene.index === 0) {
+    if (!headerLeft && props.scene.index === 0) {
       return;
     }
 
@@ -198,22 +229,30 @@ class Header extends React.PureComponent {
     const width = this.state.widths[props.scene.key]
       ? (this.props.layout.initWidth - this.state.widths[props.scene.key]) / 2
       : undefined;
-    const RenderedLeftComponent = options.headerLeft || HeaderBackButton;
+
+    const isComponent = headerLeft && typeof headerLeft === 'function';
+    const isObject = headerLeft && typeof headerLeft === 'object';
+    const RenderedLeftComponent =
+      (isComponent && headerLeft) || HeaderBackButton;
     const goBack = () => {
       // Go back on next tick because button ripple effect needs to happen on Android
       requestAnimationFrame(() => {
         props.scene.descriptor.navigation.goBack(props.scene.descriptor.key);
       });
     };
+    const onPress =
+      (isObject && headerLeft.onPress) || options.headerLeftOnPress || goBack;
+    const backImage =
+      (isObject && headerLeft.source && headerLeft) || options.headerBackImage;
     return (
       <RenderedLeftComponent
-        onPress={goBack}
+        onPress={onPress}
         pressColorAndroid={options.headerPressColorAndroid}
         tintColor={options.headerTintColor}
-        backImage={options.headerBackImage}
+        imageSource={backImage}
         title={backButtonTitle}
         truncatedTitle={truncatedBackButtonTitle}
-        backTitleVisible={this.props.backTitleVisible}
+        titleVisible={this.props.backTitleVisible}
         titleStyle={options.headerBackTitleStyle}
         layoutPreset={this.props.layoutPreset}
         width={width}
@@ -226,7 +265,11 @@ class Header extends React.PureComponent {
     ButtonContainerComponent,
     LabelContainerComponent
   ) => {
-    const { options, navigation } = props.scene.descriptor;
+    const {
+      options,
+      navigation,
+      options: { headerLeft },
+    } = props.scene.descriptor;
     const backButtonTitle = this._getBackButtonTitleString(props.scene);
     const truncatedBackButtonTitle = this._getTruncatedBackButtonTitle(
       props.scene
@@ -241,15 +284,19 @@ class Header extends React.PureComponent {
         navigation.goBack(props.scene.descriptor.key);
       });
     };
-
+    const isObject = headerLeft && typeof headerLeft === 'object';
+    const onPress =
+      (isObject && headerLeft.onPress) || options.headerLeftOnPress || goBack;
+    const backImage =
+      (isObject && headerLeft.source && headerLeft) || options.headerBackImage;
     return (
       <ModularHeaderBackButton
-        onPress={goBack}
+        onPress={onPress}
         ButtonContainerComponent={ButtonContainerComponent}
         LabelContainerComponent={LabelContainerComponent}
         pressColorAndroid={options.headerPressColorAndroid}
         tintColor={options.headerTintColor}
-        backImage={options.headerBackImage}
+        backImage={backImage}
         title={backButtonTitle}
         truncatedTitle={truncatedBackButtonTitle}
         titleStyle={options.headerBackTitleStyle}
@@ -259,8 +306,52 @@ class Header extends React.PureComponent {
   };
 
   _renderRightComponent = props => {
-    const { headerRight } = props.scene.descriptor.options;
-    return headerRight || null;
+    const {
+      options,
+      options: { headerRight },
+    } = props.scene.descriptor;
+    if (React.isValidElement(headerRight) || headerRight === null) {
+      return headerRight;
+    }
+
+    if (!headerRight && props.scene.index === 0) {
+      return;
+    }
+
+    const rightButtonTitle = this._getRightButtonTitleString(props.scene);
+    const truncatedRightButtonTitle = this._getTruncatedRightButtonTitle(
+      props.scene
+    );
+    const width = this.state.widths[props.scene.key]
+      ? (this.props.layout.initWidth - this.state.widths[props.scene.key]) / 2
+      : undefined;
+
+    const isComponent = headerRight && typeof headerRight === 'function';
+    const isObject = headerRight && typeof headerRight === 'object';
+    const RenderedRightComponent =
+      (isComponent && headerRight) || HeaderRightButton;
+    const donothing = () => null;
+    const onPress =
+      (isObject && headerRight.onPress) ||
+      options.headerRightOnPress ||
+      donothing;
+    const rightImage =
+      (isObject && headerRight.source && headerRight) ||
+      options.headerRightImage;
+    return (
+      <RenderedRightComponent
+        onPress={onPress}
+        pressColorAndroid={options.headerPressColorAndroid}
+        tintColor={options.headerTintColor}
+        imageSource={rightImage}
+        title={rightButtonTitle}
+        truncatedTitle={truncatedRightButtonTitle}
+        titleVisible={this.props.rightTitleVisible}
+        titleStyle={options.headerRightTitleStyle}
+        layoutPreset={this.props.layoutPreset}
+        width={width}
+      />
+    );
   };
 
   _renderLeft(props) {

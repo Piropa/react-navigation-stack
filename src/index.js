@@ -22,6 +22,9 @@ module.exports = {
   get HeaderBackButton() {
     return require('./views/Header/HeaderBackButton').default;
   },
+  get HeaderRightButton() {
+    return require('./views/Header/HeaderRightButton').default;
+  },
   get HeaderTitle() {
     return require('./views/Header/HeaderTitle').default;
   },

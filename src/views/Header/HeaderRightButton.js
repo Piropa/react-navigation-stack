@@ -10,15 +10,15 @@ import {
 
 import TouchableItem from '../TouchableItem';
 
-import defaultBackImage from '../assets/back-icon.png';
+import defaultRightImage from '../assets/more-icon.png';
 
-class HeaderBackButton extends React.PureComponent {
+class HeaderRightButton extends React.PureComponent {
   static defaultProps = {
     pressColorAndroid: 'rgba(0, 0, 0, .32)',
     tintColor: Platform.select({
       ios: '#037aff',
     }),
-    truncatedTitle: 'Back',
+    truncatedTitle: 'more',
   };
 
   state = {};
@@ -32,16 +32,16 @@ class HeaderBackButton extends React.PureComponent {
     });
   };
 
-  _renderBackImage() {
-    const { imageSource: backImage, title, tintColor } = this.props;
+  _renderRightImage() {
+    const { imageSource: rightImage, title, tintColor } = this.props;
 
-    let BackImage;
+    let RightImage;
     let props;
 
-    if (React.isValidElement(backImage)) {
-      return backImage;
-    } else if (typeof backImage === 'function') {
-      BackImage = backImage;
+    if (React.isValidElement(rightImage)) {
+      return rightImage;
+    } else if (typeof rightImage === 'function') {
+      RightImage = rightImage;
       props = {
         tintColor,
         title,
@@ -50,15 +50,15 @@ class HeaderBackButton extends React.PureComponent {
       let sourceImage = undefined,
         sourceFunc = undefined,
         moreProps = undefined;
-      if (backImage && typeof backImage === 'object' && backImage.source) {
-        if (React.isValidElement(backImage.source)) {
-          return backImage.source;
-        } else if (typeof backImage.source === 'function') {
-          sourceFunc = backImage.source;
+      if (rightImage && typeof rightImage === 'object' && rightImage.source) {
+        if (React.isValidElement(rightImage.source)) {
+          return rightImage.source;
+        } else if (typeof rightImage.source === 'function') {
+          sourceFunc = rightImage.source;
           moreProps = { tintColor, title };
-        } else sourceImage = backImage.source;
+        } else sourceImage = rightImage.source;
       }
-      BackImage = sourceFunc || Image;
+      RightImage = sourceFunc || Image;
       props = {
         style: [
           styles.icon,
@@ -66,18 +66,18 @@ class HeaderBackButton extends React.PureComponent {
           !!title && styles.iconWithTitle,
           !sourceFunc && !!tintColor && { tintColor },
         ],
-        source: sourceImage || defaultBackImage,
+        source: sourceImage || defaultRightImage,
         ...moreProps,
       };
     }
 
-    return <BackImage {...props} />;
+    return <RightImage {...props} />;
   }
 
   _maybeRenderTitle() {
     const {
       layoutPreset,
-      titleVisible: backTitleVisible,
+      titleVisible: rightTitleVisible,
       width,
       title,
       titleStyle,
@@ -90,17 +90,17 @@ class HeaderBackButton extends React.PureComponent {
         ? this.state.initialTextWidth > width
         : false;
 
-    const backButtonTitle = renderTruncated ? truncatedTitle : title;
+    const rightButtonTitle = renderTruncated ? truncatedTitle : title;
 
     // If the left preset is used and we aren't on Android, then we
     // default to disabling the label
     const titleDefaultsToDisabled =
       layoutPreset === 'left' ||
       Platform.OS === 'android' ||
-      typeof backButtonTitle !== 'string';
+      typeof rightButtonTitle !== 'string';
 
     // If the title is explicitly enabled then we respect that
-    if (titleDefaultsToDisabled && !backTitleVisible) {
+    if (titleDefaultsToDisabled && !rightTitleVisible) {
       return null;
     }
 
@@ -111,7 +111,7 @@ class HeaderBackButton extends React.PureComponent {
         style={[styles.title, !!tintColor && { color: tintColor }, titleStyle]}
         numberOfLines={1}
       >
-        {backButtonTitle}
+        {rightButtonTitle}
       </Text>
     );
   }
@@ -125,7 +125,7 @@ class HeaderBackButton extends React.PureComponent {
         accessibilityComponentType="button"
         accessibilityLabel={title}
         accessibilityTraits="button"
-        testID="header-back"
+        testID="header-right"
         delayPressIn={0}
         onPress={onPress}
         pressColor={pressColorAndroid}
@@ -133,7 +133,7 @@ class HeaderBackButton extends React.PureComponent {
         borderless
       >
         <View style={styles.container}>
-          {this._renderBackImage()}
+          {this._renderRightImage()}
           {this._maybeRenderTitle()}
         </View>
       </TouchableItem>
@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
       ? {
           height: 21,
           width: 13,
-          marginLeft: 9,
-          marginRight: 22,
+          marginLeft: 22,
+          marginRight: 9,
           marginVertical: 12,
           // resizeMode: 'contain',
           transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
@@ -185,9 +185,9 @@ const styles = StyleSheet.create({
   iconWithTitle:
     Platform.OS === 'ios'
       ? {
-          marginRight: 6,
+          marginLeft: 6,
         }
       : {},
 });
 
-export default HeaderBackButton;
+export default HeaderRightButton;
